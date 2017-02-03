@@ -428,14 +428,31 @@ function convergePF(; α = 0.2, β=Inf, qs = 1.,
     return ep, op, tf, pars
 end
 
-function spanPF(; q0=0.13501842754948257,
-                qh0=0.2307230899667445,
-                qh1=-1.0764979782649626,
-                Qh = 0.0646,
-                sh1 = 0.172,
-                sh0 = 0.068,
-                Q = 0.076,
-                s0 = 0.065,
+"""
+    readopPF(file::String, line::Int=-1)
+
+Read order params from results file.
+Zero or negative line numbers are counted
+from the end of the file.
+"""
+function readopPF(file::String, line::Int=0)
+    lines = readlines(file)
+    l = line > 0 ? line : length(lines) + line
+    v = map(x->parse(Float64, x), split(lines[l]))
+
+    i0 = length(fieldnames(ExtParamsPF))
+    iend = i0 + length(fieldnames(OrderParamsPF))
+    return OrderParamsPF(v[i0+1:iend]...)
+end
+
+function spanPF(; q0=0.13,
+                qh0=0.23,
+                qh1=-1.0,
+                Qh = 0.06,
+                sh1 = 0.17,
+                sh0 = 0.06,
+                Q = 0.07,
+                s0 = 0.06,
                 s1 = 0.1,
                 Sh = sh1,
                 kws...)
