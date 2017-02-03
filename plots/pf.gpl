@@ -1,0 +1,14 @@
+set term postscript eps enhanced color dashed "Helvetica" 16
+set fit results
+
+set output "pf.eps"
+set ylabel "PF Entropy"
+set xlabel "d"
+set xr[0.:]
+set yr[:]
+set key left
+plot    "<awk '$1==0.6' resultsPF_continuous_theta.txt " u ((1-$4)/2):15  w lp t "{/Symbol a}=0.6 continuous",\
+        "<awk '$1==0.6' resultsPF_binary_theta.txt " u ((1-$4)/2):15 w lp t "{/Symbol a}=0.6 binary",\
+        "<awk '$1==0.7' resultsPF_binary_theta.txt " u ((1-$4)/2):15 w lp t "{/Symbol a}=0.7 binary",\
+        0 ls 0 not
+reset

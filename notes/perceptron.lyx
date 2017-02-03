@@ -1,0 +1,894 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass revtex4-1
+\begin_preamble
+\DeclareMathOperator{\dd}{\mathrm{d}}
+\DeclareMathOperator{\dD}{\mathrm{D}}
+\DeclareMathOperator{\erf}{erf}
+\DeclareMathOperator{\sign}{sign}
+\end_preamble
+\options english,aps,prl,reprint,superscriptaddress,showpacs, onecolumn, notitlepage
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks false
+\pdf_backref false
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 2
+\use_package amssymb 2
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+Continuous Perceptron
+\end_layout
+
+\begin_layout Section
+Standard Perceptron
+\end_layout
+
+\begin_layout Standard
+We consider a perceptron with binary or continuous variables, that we shall
+ assume take value in some measure space 
+\begin_inset Formula $\Omega$
+\end_inset
+
+.
+ We also impose the norm 
+\begin_inset Formula $q_{*}N$
+\end_inset
+
+, with 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+of course 
+\begin_inset Formula $q_{*}=1$
+\end_inset
+
+
+\family default
+\series default
+\shape default
+\size default
+\emph default
+\bar default
+\strikeout default
+\uuline default
+\uwave default
+\noun default
+\color inherit
+ for binary synapsis.
+ In particular we shall consider 
+\begin_inset Formula $\Omega=[-\infty,+\infty]$
+\end_inset
+
+, 
+\begin_inset Formula $\Omega=[-1,+1]$
+\end_inset
+
+ and 
+\begin_inset Formula $\Omega=\{-1,+1\}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+We will allow for a generic energy function 
+\begin_inset Formula $f\left(\frac{\sum_{i}\xi_{i}^{\mu}W_{i}}{\sqrt{N}}\right)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+Entropy Calculation
+\end_layout
+
+\begin_layout Standard
+The replicated partition function of the model is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\overline{Z^{n}}=\int_{\Omega}\prod_{a,i}\mathrm{d}W_{i}^{a}\ \prod_{a}\delta\left(\sum_{i}\left(W_{i}^{a}\right)^{2}-q_{*}N\right)\ \prod_{\mu,a}f\left(\frac{\sum_{i}\xi_{i}^{\mu}W_{i}^{a}}{\sqrt{N}}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+
+\begin_inset Formula $q_{*}$
+\end_inset
+
+ is an external fixed normalization (generally 
+\begin_inset Formula $q_{*}=1$
+\end_inset
+
+) and where 
+\begin_inset Formula $f$
+\end_inset
+
+ is a generic energetic term (e.g.
+ 
+\begin_inset Formula $f(x)=\theta(x)$
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+After some manipulations 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\overline{Z^{n}}=\int\prod_{a}\frac{\mathrm{d}\hat{q}_{aa}}{2\pi}\prod_{a<b}\frac{\mathrm{d}\hat{q}_{ab}\mathrm{d}q_{ab}}{2\pi}e^{N\phi[\hat{q},q]}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where the replicated action is given by
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\phi[\hat{q},q]=-\frac{1}{2}\sum_{a,b}\hat{q}_{ab}\,q_{ab}+G_{S}+\alpha G_{E}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where we identified 
+\begin_inset Formula $q_{aa}=q_{*}$
+\end_inset
+
+ and
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+G_{S}[\hat{q}] & =\log\int_{\Omega}\prod_{a}\dd W_{a}\ e^{\frac{1}{2}\sum_{ab}\hat{q}_{ab}W_{a}W_{b}}\\
+G_{E}[q] & =\log\int\prod_{a}\frac{\dd\hat{u}_{a}\dd u_{a}}{2\pi}\ e^{-\frac{1}{2}\sum_{ab}q_{ab}\hat{u}_{a}\hat{u}_{b}+i\hat{u}_{a}u_{a}}\prod_{a}f(u_{a})
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Saddle point equation read
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\hat{q}_{ab} & =-\alpha\ll\hat{u}_{a}\hat{u}_{b}\gg_{E}\qquad a>b\\
+q_{ab} & =\ll W_{a}W_{b}\gg_{S}\qquad a>b\\
+q_{aa} & \equiv q_{*}=\ll W_{a}^{2}\gg_{S}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Last equations should be solved implicitly for 
+\begin_inset Formula $\hat{q}_{aa}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection
+RS ansatz
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\frac{1}{n}\phi[\hat{q},q]\sim-\frac{1}{2}(q_{*}\hat{q}_{1}-q_{0}\hat{q}_{0})+\mathcal{G}_{s}+\alpha\mathcal{G}_{E}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\mathcal{G}_{S}[\hat{q}] & =\int\mathcal{D}z_{0}\log\int_{\Omega}\mathrm{d}W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}\\
+\mathcal{G}_{E}[q] & =\int\mathcal{D}z_{0}\log\int\mathcal{D}u\ f\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For the binary Percetron 
+\begin_inset Formula $\hat{q}_{1}=0,q_{*}=1,\int dW=\sum_{W=\pm1}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Saddle points condition, obtained by derivation of last equations, read
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\hat{q}_{0} & =\int\mathcal{D}z_{0}\left(\frac{\int\mathcal{D}u\ f'\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}{\int\mathcal{D}u\ f\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}\right)^{2}\\
+q_{0} & =\int\mathcal{D}z_{0}\ \frac{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}\left(W^{2}-\frac{1}{\sqrt{\hat{q}_{0}}}z_{0}W\right)}{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}}\\
+q_{*} & =\int\mathcal{D}z_{0}\ \frac{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}\,W^{2}}{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $\int_{-\infty}^{+\infty}dW$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\mathcal{G}_{S}[\hat{q}] & =\frac{1}{2}\log(2\pi)+\frac{\hat{q}_{0}}{2(\hat{q}_{0}-\hat{q}_{1})}-\frac{1}{2}\log(\hat{q}_{0}-\hat{q}_{1})\\
+q_{0} & =\frac{\hat{q}_{0}}{(\hat{q}_{0}-\hat{q}_{1})^{2}}\\
+q_{*} & =\frac{2\hat{q}_{0}-\hat{q}_{1}}{(\hat{q}_{0}-\hat{q}_{1})^{2}}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Last equation solved for 
+\begin_inset Formula $\hat{q}_{1}$
+\end_inset
+
+ gives
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\hat{q}_{1}=\frac{-1+2\hat{q}_{0}q_{*}-\sqrt{1+4\hat{q}_{0}q_{*}}}{2q_{*}}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $\int_{-1}^{+1}dW$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{S}=-\frac{1}{2}\log a+\int\mathcal{D}z_{0}\ \log\left[\sqrt{\frac{\pi}{2}}e^{-\frac{b^{2}}{2a}}\left(\text{erfi}\left(\frac{a-b}{\sqrt{2}\sqrt{a}}\right)+\text{erfi}\left(\frac{a+b}{\sqrt{2}\sqrt{a}}\right)\right)\right]
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $\sum_{W=\pm1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mathcal{G}_{S}[\hat{q}]=\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})+\int\mathcal{D}z_{0}\log2\cosh\left(\sqrt{\hat{q}_{0}}z_{0}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+q_{0}=\int\mathcal{D}z_{0}\ \tanh^{2}\left(\sqrt{\hat{q}_{0}}z_{0}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\hat{q}_{1}$
+\end_inset
+
+ in this case is undetermined and can be set to 
+\begin_inset Formula $0$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $f(x)=\theta(x)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mathcal{G}_{E}[q]=\int\mathcal{D}z_{0}\log H\left(-\frac{\sqrt{q_{0}}z_{0}}{\sqrt{q_{*}-q_{0}}}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\hat{q}_{0}=\frac{1}{q_{*}-q_{0}}\int\mathcal{D}z_{0}\left(\frac{G\left(-\frac{\sqrt{q_{0}}z_{0}}{\sqrt{q_{*}-q_{0}}}\right)}{H\left(-\frac{\sqrt{q_{0}}z_{0}}{\sqrt{q_{*}-q_{0}}}\right)}\right)^{2}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $f(x)=H^{\beta}\left(-\frac{x}{\sqrt{1-q_{*}}}\right)$
+\end_inset
+
+ (likelihood)
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mathcal{G}_{E}[q]=\int\mathcal{D}z_{0}\log\int\mathcal{D}u\ H^{\beta}\left(-\frac{\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u}{\sqrt{1-q_{*}}}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Parisi-Franz with binary perceptron
+\end_layout
+
+\begin_layout Standard
+Now we couple with our system, that we shall denote with 
+\begin_inset Formula $\tilde{W}$
+\end_inset
+
+, a binary perceptron 
+\begin_inset Formula $W$
+\end_inset
+
+.
+ We enforce an overlap 
+\begin_inset Formula $S=\frac{1}{N}\sum_{i}W_{i}\sign(\tilde{W}_{i}$
+\end_inset
+
+).
+ For binary 
+\begin_inset Formula $\tilde{W}$
+\end_inset
+
+ this corresponds to a standard overlap.
+ 
+\begin_inset Formula 
+\begin{equation}
+\phi_{FP}(S)=-\frac{1}{2}\hat{Q}\left(1-Q\right)+\hat{s}_{0}s_{0}-\hat{s}_{1}s_{1}-\gamma S+G_{S}+\alpha G_{E}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{S}=\int\dD z_{0}\,\frac{\int_{\Omega}\dd\tilde{W}\int\mathcal{D}\eta\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})\tilde{W}^{2}+\sqrt{\hat{q}_{0}}z_{0}\tilde{W}}A_{S}(\tilde{W},\eta,z_{0})}{\int_{\Omega}\dd\tilde{W}\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})\tilde{W}^{2}+\sqrt{\hat{q}_{0}}z_{0}\tilde{W}}}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+A_{S}(\tilde{W},\eta,z_{0})=\log2\cosh\left((\hat{s}_{1}-\hat{s}_{0})\tilde{W}+\gamma\sign(\tilde{W})+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}}\eta+\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}z_{0}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{E}=\int\mathcal{D}z_{0}\frac{\int\mathcal{D}\eta\mathcal{D}z_{1}\ f\left(\sqrt{q_{0}}z_{0}+\sqrt{a}z_{1}+\frac{s_{1}-s_{0}}{\sqrt{b}}\eta\right)\log H\left(-\frac{\sqrt{b}\eta+\frac{s_{0}}{\sqrt{q_{0}}}z_{0}}{\sqrt{1-Q}}\right)}{\int\mathcal{D}z_{1}\ f\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}z_{1}\right)}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+a & =q_{*}-q_{0}-\frac{\left(s_{1}-s_{0}\right)^{2}}{\left(Q-s_{0}\right)}\left(1-\frac{s_{0}\left(q_{0}-s_{0}\right)}{\left(Qq_{0}-s_{0}^{2}\right)}\right)\\
+b & =\frac{Qq_{0}-s_{0}^{2}}{q_{0}}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Saddle point equations read
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\hat{Q} & =-2\alpha\frac{\partial G_{E}}{\partial Q}\\
+Q & =1-2\frac{\partial G_{S}}{\partial\hat{Q}}\\
+s_{0} & =-\frac{\partial G_{S}}{\partial\hat{s}_{0}}\\
+\hat{s}_{0} & =-\alpha\frac{\partial G_{E}}{\partial s_{0}}\\
+s_{1} & =\frac{\partial G_{S}}{\partial\hat{s}_{1}}\\
+\hat{s}_{1} & =\alpha\frac{\partial G_{E}}{\partial s_{1}}\\
+S & =\frac{\partial G_{S}}{\partial\gamma}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the case of binary 
+\begin_inset Formula $\tilde{W}$
+\end_inset
+
+ we can set 
+\begin_inset Formula $\gamma=0$
+\end_inset
+
+, 
+\begin_inset Formula $s_{1}=S$
+\end_inset
+
+, and drop last two equations.
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $\sum_{\tilde{W}=\pm1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{S}=\int\dD z_{0}\,\frac{\sum_{\tilde{W}=\pm1}\int\mathcal{D}\eta\ e^{\sqrt{\hat{q}_{0}}z_{0}\tilde{W}}A_{S}(\tilde{W},\eta,z_{0})}{2\cosh\left(\sqrt{\hat{q}_{0}}z_{0}\tilde{W}\right)}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+A_{S}(\tilde{W},\eta,z_{0})=\log2\cosh\left((\hat{s}_{1}-\hat{s}_{0})\tilde{W}+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}}\eta+\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}z_{0}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $\int_{-\infty}^{+\infty}d\tilde{W}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+assuming 
+\begin_inset Formula $\hat{q}_{0}>\hat{q}_{1}.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{S}=\int\dD z_{0}\mathcal{D}\tilde{W}\mathcal{D}\eta\ A_{S}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+A_{S} & =\log2\cosh\left(\frac{(\hat{s}_{1}-\hat{s}_{0})}{\hat{q}_{0}-\hat{q}_{1}}\left(\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}\right)+\gamma\sign\left(\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}\right)+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}}\eta+\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}z_{0}\right)
+\end{align}
+
+\end_inset
+
+which can be simplified to
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{S}=\int\mathcal{D}\tilde{W}\mathcal{D}z_{0}\ \log2\cosh\left[\left(\frac{\hat{s}_{1}-\hat{s}_{0}}{\hat{q}_{0}-\hat{q}_{1}}\sqrt{2\hat{q}_{0}-\hat{q}_{1}}+\frac{\hat{s}_{0}}{\sqrt{2\hat{q}_{0}-\hat{q}_{1}}}\right)\tilde{W}+\gamma\sign(\tilde{W})+\sqrt{\hat{Q}-\frac{\hat{s}_{0}^{2}}{2\hat{q}_{0}-\hat{q}_{1}}}z_{0}\right]
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $\int_{-1}^{+1}d\tilde{W}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+assuming 
+\begin_inset Formula $\hat{q}_{0}>\hat{q}_{1}.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{S}=\int\dD z_{0}\frac{\int\mathcal{D}\tilde{W}\mathcal{D}\eta\ I\left(-1<\frac{\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}}{\hat{q}_{0}-\hat{q}_{1}}<1\right)\,A_{S}}{\int\mathcal{D}\tilde{W}\ I\left(-1<\frac{\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}}{\hat{q}_{0}-\hat{q}_{1}}<1\right)}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+A_{S} & =\log2\cosh\left(\frac{(\hat{s}_{1}-\hat{s}_{0})}{\hat{q}_{0}-\hat{q}_{1}}\left(\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}\right)+\gamma\sign\left(\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}\right)+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}}\eta+\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}z_{0}\right)
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We split the integral in two parts
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+I\left(0<\frac{\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}}{\hat{q}_{0}-\hat{q}_{1}}<1\right)\,A_{S}^{+}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+A_{S}^{+} & =\log2\cosh\left(\left(\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}+\frac{(\hat{s}_{1}-\hat{s}_{0})}{\hat{q}_{0}-\hat{q}_{1}}\sqrt{\hat{q}_{0}}\right)z_{0}+\gamma+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}}\eta+\frac{(\hat{s}_{1}-\hat{s}_{0})}{\sqrt{\hat{q}_{0}-\hat{q}_{1}}}\tilde{W}\right)\\
+ & =\log2\cosh\left(\left(\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}+\frac{(\hat{s}_{1}-\hat{s}_{0})}{\hat{q}_{0}-\hat{q}_{1}}\sqrt{\hat{q}_{0}}\right)z_{0}+\gamma+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}+\frac{(\hat{s}_{1}-\hat{s}_{0})^{2}}{\hat{q}_{0}-\hat{q}_{1}}}W'\right)
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+I\left(0<\frac{\sqrt{\hat{q}_{0}-\hat{q}_{1}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}}{\hat{q}_{0}-\hat{q}_{1}}<1\right) & =I\left(0<\frac{\sqrt{\hat{q}_{0}}}{\hat{q}_{0}-\hat{q}_{1}}z_{0}+\frac{1}{\sqrt{\hat{q}_{0}-\hat{q}_{1}}}\left(\frac{\sqrt{b}}{\sqrt{a+b}}W'-\frac{\sqrt{a}}{\sqrt{a+b}}\eta'\right)<1\right)\\
+ & =I\left(0<d-\frac{1}{\sqrt{\hat{q}_{0}-\hat{q}_{1}}}\frac{\sqrt{a}}{\sqrt{a+b}}\eta'<1\right)\\
+ & =I\left(-1+d<\frac{1}{\sqrt{\hat{q}_{0}-\hat{q}_{1}}}\frac{\sqrt{a}}{\sqrt{a+b}}\eta'<d\right)\\
+ & =I\left(\frac{-1+d}{\frac{1}{\sqrt{\hat{q}_{0}-\hat{q}_{1}}}\frac{\sqrt{a}}{\sqrt{a+b}}}<\eta'<\frac{d}{\frac{1}{\sqrt{\hat{q}_{0}-\hat{q}_{1}}}\frac{\sqrt{a}}{\sqrt{a+b}}}\right)
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+a & =\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}\\
+b & =\frac{(\hat{s}_{1}-\hat{s}_{0})^{2}}{\hat{q}_{0}-\hat{q}_{1}}\\
+d & =\frac{\sqrt{\hat{q}_{0}}}{\hat{q}_{0}-\hat{q}_{1}}z_{0}+\frac{1}{\sqrt{\hat{q}_{0}-\hat{q}_{1}}}\frac{\sqrt{b}}{\sqrt{a+b}}W'
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+....
+\end_layout
+
+\begin_layout Standard
+assuming 
+\begin_inset Formula $\hat{q}_{1}>\hat{q}_{0}.$
+\end_inset
+
+ We change the sign of 
+\begin_inset Formula $z_{0}.$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{S}=\int\dD z_{0}\frac{\int\tilde{\mathcal{D}}\tilde{W}\mathcal{D}\eta\ I\left(-1<\frac{\sqrt{\hat{q}_{1}-\hat{q}_{0}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}}{\hat{q}_{1}-\hat{q}_{0}}<1\right)\,A_{S}}{\int\tilde{\mathcal{D}}\tilde{W}\ I\left(-1<\frac{\sqrt{\hat{q}_{1}-\hat{q}_{0}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}}{\hat{q}_{1}-\hat{q}_{0}}<1\right)}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\tilde{\mathcal{D}}\tilde{W}=\exp(\frac{x^{2}}{2})/\sqrt{2\pi}\dd x$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+A_{S} & =\log2\cosh\left(\frac{(\hat{s}_{1}-\hat{s}_{0})}{\hat{q}_{1}-\hat{q}_{0}}\left(\sqrt{\hat{q}_{1}-\hat{q}_{0}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}\right)+\gamma\sign\left(\sqrt{\hat{q}_{1}-\hat{q}_{0}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}\right)+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}}\eta-\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}z_{0}\right)
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We split the integral in two parts and the make a change of variables 
+\begin_inset Formula $\tilde{W},\eta\to\tilde{W}',\eta'$
+\end_inset
+
+:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+I\left(0<\frac{\sqrt{\hat{q}_{1}-\hat{q}_{0}}\tilde{W}+\sqrt{\hat{q}_{0}}z_{0}}{\hat{q}_{1}-\hat{q}_{0}}<1\right)\,A_{S}^{+}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+A_{S}^{+} & =\log2\cosh\left(\left(-\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}+\frac{(\hat{s}_{1}-\hat{s}_{0})}{\hat{q}_{1}-\hat{q}_{0}}\sqrt{\hat{q}_{0}}\right)z_{0}+\gamma+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}}\eta+\frac{(\hat{s}_{1}-\hat{s}_{0})}{\sqrt{\hat{q}_{1}-\hat{q}_{0}}}\tilde{W}\right)\\
+ & =\log2\cosh\left(\left(-\frac{\hat{s}_{0}}{\sqrt{\hat{q}_{0}}}+\frac{(\hat{s}_{1}-\hat{s}_{0})}{\hat{q}_{1}-\hat{q}_{0}}\sqrt{\hat{q}_{0}}\right)z_{0}+\gamma+\sqrt{\frac{\hat{Q}\hat{q}_{0}-\hat{s}_{0}^{2}}{\hat{q}_{0}}+\frac{(\hat{s}_{1}-\hat{s}_{0})^{2}}{\hat{q}_{1}-\hat{q}_{0}}}W'\right)
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+....
+\end_layout
+
+\begin_layout Subsubsection
+case 
+\begin_inset Formula $f(x)=\theta(x)$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+G_{E}=\int\dD z_{0}\frac{\int\dD\eta\ H\left(-\frac{\sqrt{q_{0}}z_{0}+\sqrt{\frac{\left(s_{1}-s_{0}\right)^{2}}{b}}\eta}{\sqrt{a}}\right)\log H\left(-\frac{\sqrt{b}\eta+\frac{s_{0}}{\sqrt{q_{0}}}z_{0}}{\sqrt{1-Q}}\right)}{H\left(-\frac{\sqrt{q_{0}}z_{0}}{\sqrt{q_{*}-q_{0}}}\right)}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+a & =q_{*}-q_{0}-\frac{\left(s_{1}-s_{0}\right)^{2}}{\left(Q-s_{0}\right)}\left(1-\frac{s_{0}\left(q_{0}-s_{0}\right)}{\left(Qq_{0}-s_{0}^{2}\right)}\right)\\
+b & =\frac{Qq_{0}-s_{0}^{2}}{q_{0}}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document
