@@ -10,7 +10,7 @@ res = Perceptron.span( αlist=[0.2:0.1:0.6;], enetype=:continuous, vartype=:bina
 
 
 # Parisi Franz
-file = joinpath(@__DIR__, "../data/resultsPF_binary_theta.txt")
+file = joinpath(dirname(@__FILE__), "../data/resultsPF_binary_theta.txt")
 ep, op = Perceptron.readparamsPF(file)
 res = Perceptron.spanPF!(op;
                     αlist=ep.α,Slist=ep.S, qslist=ep.qs,
@@ -18,7 +18,7 @@ res = Perceptron.spanPF!(op;
                     ψ = 0.3
                     )
 
-file = joinpath(@__DIR__, "../data/resultsPF_continuous_theta.txt")
+file = joinpath(dirname(@__FILE__), "../data/resultsPF_continuous_theta.txt")
 ep, op = Perceptron.readparamsPF(file)
 res = Perceptron.spanPF!(op;
                     αlist=ep.α,Slist=ep.S, qslist=ep.qs,
@@ -26,7 +26,7 @@ res = Perceptron.spanPF!(op;
                     ψ = 0.3
                     )
 
-file = joinpath(@__DIR__, "../data/resultsPF_continuous1_theta.txt")
+file = joinpath(dirname(@__FILE__), "../data/resultsPF_continuous1_theta.txt")
 ep, op = Perceptron.readparamsPF(file)
 res = Perceptron.spanPF!(op;
                     αlist=ep.α,Slist=ep.S, qslist=ep.qs,

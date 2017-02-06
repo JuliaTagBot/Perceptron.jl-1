@@ -3,9 +3,7 @@ using LittleScienceTools.Roots
 using ExtractMacro
 using Dierckx
 
-if VERSION > v"0.6dev"
-    import QuadGK: quadgk
-end
+import QuadGK: quadgk
 
 @assert success(`which lockfile`)
 
