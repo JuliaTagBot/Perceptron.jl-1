@@ -6,8 +6,8 @@ Pkg.clone("https://github.com/CarloLucibello/Perceptron.jl")
 ```
 Supported `vartype`:
 - `:binary`: ±1
-- `:continuous`: real values with spherical constrain (`qs`, default to 1)
-- `:continuous1`: real values in `[-1,1]`
+- `:continuous`: real values with spherical constraint (`qs`, default to 1)
+- `:continuous1`: real values in `[-1,1]` and global spherical norm `qs^2`
 
 Supported `enetype`:
 - `:theta`
