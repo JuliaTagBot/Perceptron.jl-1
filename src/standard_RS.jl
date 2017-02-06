@@ -118,10 +118,10 @@ fqh0_theta(α, β, q0, qs) = -2α*∂q0_Ge_theta(β, q0, qs)
 fqh0_loglike(α, β, q0, qs) = -2α*deriv(Ge_loglike, 2, β, q0, qs)
 
 function iqh1_continuous1(qs, qh0, qh1_0)
-    ok, qh1, it, normf0 = newton(qh1 -> qs - fqs_continuous1(qh0, qh1), qh1_0)
+    ok, qh1, it, normf0 = findroot(qh1 -> qs - fqs_continuous1(qh0, qh1), qh1_0, NewtonMethod())
     # ok, qh1, it, normf0 = findzero_interp(qh1 -> qs - fs1PF_binary(qh0, qh1), qh1_0)
 
-    ok || normf0 < 1e-6 || warn("newton failed: z=$qh1, it=$it, normf0=$normf0")
+    ok || normf0 < 1e-6 || warn("findroot failed: z=$qh1, it=$it, normf0=$normf0")
     ok = true
     if normf0 > 1e-4
         ok = false

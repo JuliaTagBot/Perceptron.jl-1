@@ -1,4 +1,4 @@
-module Perc
+module Perceptron
 using LittleScienceTools.Roots
 using ExtractMacro
 using Dierckx
@@ -78,7 +78,7 @@ end
 abstract AbstractParams
 
 type Params <: AbstractParams
-    ϵ::Float64 #newtons'
+    ϵ::Float64
     ψ::Float64
     maxiters::Int
     verb::Int
@@ -124,7 +124,6 @@ macro updateI(x, ok, func, Δ, ψ, verb, params...)
     end
 end
 
-include("interp.jl")
 include("standard_RS.jl")
 include("parisi_franz.jl")
 

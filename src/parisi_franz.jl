@@ -217,8 +217,9 @@ fSPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = deriv(GsPF_continuous1, 5, qh0, q
 fQPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = 1-2*deriv(GsPF_continuous1, 6, qh0, qh1, sh0, sh1, Sh, Qh)
 
 function iShPF_continuous(S, qh0, qh1, sh0, sh1, Sh_0, Qh)
-    ok, Sh, it, normf0 = findzero_interp(Sh -> S - fSPF_continuous(qh0, qh1, sh0, sh1, Sh, Qh), Sh_0)
-    ok || normf0 < 1e-8 || warn("newton failed: z=$(Sh_0), it=$it, normf0=$normf0")
+    ok, Sh, it, normf0 = findroot(Sh -> S - fSPF_continuous(qh0, qh1, sh0, sh1, Sh, Qh), Sh_0,
+                            InterpolationMethod(), atol=1e-7, n=5)
+    ok || normf0 < 1e-7 || warn("findroot failed: z=$(Sh_0), it=$it, normf0=$normf0")
     ok = true
     if normf0 > 1e-3
         ok = false
@@ -227,8 +228,9 @@ function iShPF_continuous(S, qh0, qh1, sh0, sh1, Sh_0, Qh)
 end
 
 function iShPF_continuous1(S, qh0, qh1, sh0, sh1, Sh_0, Qh)
-    ok, Sh, it, normf0 = findzero_interp(Sh -> S - fSPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh), Sh_0)
-    ok || normf0 < 1e-8 || warn("newton failed: z=$(Sh_0), it=$it, normf0=$normf0")
+    ok, Sh, it, normf0 = findroot(Sh -> S - fSPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh), Sh_0,
+                            InterpolationMethod(), atol=1e-7, n=5)
+    ok || normf0 < 1e-7 || warn("findroot failed: z=$(Sh_0), it=$it, normf0=$normf0")
     ok = true
     if normf0 > 1e-3
         ok = false
@@ -237,10 +239,10 @@ function iShPF_continuous1(S, qh0, qh1, sh0, sh1, Sh_0, Qh)
 end
 
 function ish1PF_binary(s1, qh0, qh1, sh0, sh1_0, Qh)
-    # ok, sh1, it, normf0 = newton(sh1 -> s1 - fs1PF_binary(qh0, qh1, sh0, sh1, Qh), sh1_0)
-    ok, sh1, it, normf0 = findzero_interp(sh1 -> s1 - fs1PF_binary(qh0, qh1, sh0, sh1, Qh), sh1_0)
+    ok, sh1, it, normf0 = findroot(sh1 -> s1 - fs1PF_binary(qh0, qh1, sh0, sh1, Qh), sh1_0,
+                            InterpolationMethod(), atol=1e-7, n=5)
 
-    ok || normf0 < 1e-8 || warn("newton failed: z=$sh1, it=$it, normf0=$normf0")
+    ok || normf0 < 1e-7 || warn("findroot failed: z=$sh1, it=$it, normf0=$normf0")
     ok = true
     if normf0 > 1e-3
         ok = false
@@ -429,20 +431,20 @@ function convergePF(; α = 0.2, β=Inf, qs = 1.,
 end
 
 """
-    readopPF(file::String, line::Int=-1)
+    readparamsPF(file::String, line::Int=-1)
 
-Read order params from results file.
+Read order and external params from results file.
 Zero or negative line numbers are counted
 from the end of the file.
 """
-function readopPF(file::String, line::Int=0)
+function readparamsPF(file::String, line::Int=0)
     lines = readlines(file)
     l = line > 0 ? line : length(lines) + line
     v = map(x->parse(Float64, x), split(lines[l]))
 
     i0 = length(fieldnames(ExtParamsPF))
     iend = i0 + length(fieldnames(OrderParamsPF))
-    return OrderParamsPF(v[i0+1:iend]...)
+    return ExtParamsPF(v[1:i0]...), OrderParamsPF(v[i0+1:iend]...)
 end
 
 function spanPF(; q0=0.13,
