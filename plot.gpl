@@ -1,0 +1,12 @@
+set term postscript eps enhanced color dashed "Helvetica" 16
+set fit results
+
+set output "entropy.eps"
+set ylabel "Entropy"
+set xlabel "{/Symbol a}"
+set key left
+plot    "<cat results_continuous_theta.txt " u 1:7  w lp t "continuous",\
+        "<cat results_binary_theta.txt " u 1:7 w lp t " binary",\
+        0 ls 0 not
+reset
+reset

@@ -44,16 +44,21 @@ function Ge_loglike(β, q0, qs)
 end
 
 # ENTROPIC TERM
+function flogerf(a,b)
+    b < 0 && return flogerf(a,-b)
+    (a^2 + b^2) / (2a) + log(2/√π) + b + log(e^(-2b) * dawson((a-b)/√(2a)) + dawson((a+b)/√(2a)))
+end
+
 function argGs_continuous1(z0, qh0, qh1)
     b = √qh0 * z0
-    if qh1 > qh0
-        a = qh1 - qh0
-        res = -b^2/(2a) + 0.5*log(π/2) - 0.5*log(a)
-        res += log(erfi((a-b)/√(2a)) + erfi((a+b)/√(2a)))
+    a = qh0 - qh1
+    aa  = abs(a)
+    res = b^2/(2a) + 0.5*log(π/2) - 0.5*log(aa)
+    if a < 0
+        res += flogerf(aa,b)
+        # res += log(erfi((aa + b)/√(2aa)) + erfi((aa-b)/√(2aa)))
     else
-        a = qh0 - qh1
-        res = b^2/(2a) + 0.5*log(π/2) - 0.5*log(a)
-        res += log(erf((a-b)/√(2a)) + erf((a+b)/√(2a)))
+        res += log(erf((aa + b)/√(2aa)) + erf((aa-b)/√(2aa)))
     end
     return res
 end
@@ -109,16 +114,17 @@ end
 fq0_continuous(qh0, qh1) = -2*∂qh0_Gs_continuous(qh0, qh1)
 fqh1_continuous(qs, qh0, qh1) = (-1+2qh0*qs-√(1+4qh0*qs)) / (2qs)
 
-fq0_continuous1(qh0, qh1) = -2*deriv(Gs_continuous1, 1, qh0, qh1)
-fqs_continuous1(qh0, qh1) = 2*deriv(Gs_continuous1, 2, qh0, qh1)
+fq0_continuous1(qh0, qh1) = -2*deriv∫D(argGs_continuous1, 1, qh0, qh1)
+fqs_continuous1(qh0, qh1) = 2*deriv∫D(argGs_continuous1, 2, qh0, qh1)
 
 fq0_binary(qh0, qh1) = -2*∂qh0_Gs_binary(qh0, qh1)
 
 fqh0_theta(α, β, q0, qs) = -2α*∂q0_Ge_theta(β, q0, qs)
-fqh0_loglike(α, β, q0, qs) = -2α*deriv(Ge_loglike, 2, β, q0, qs)
+fqh0_loglike(α, β, q0, qs) = -2α*grad(Ge_loglike, 2)(β, q0, qs)
 
 function iqh1_continuous1(qs, qh0, qh1_0)
     ok, qh1, it, normf0 = findroot(qh1 -> qs - fqs_continuous1(qh0, qh1), qh1_0, NewtonMethod())
+    # ok, qh1, it, normf0 = findroot(qh1 -> qs - fqs_continuous1(qh0, qh1), qh1_0, InterpolationMethod(), n=7)
     # ok, qh1, it, normf0 = findzero_interp(qh1 -> qs - fs1PF_binary(qh0, qh1), qh1_0)
 
     ok || normf0 < 1e-6 || warn("findroot failed: z=$qh1, it=$it, normf0=$normf0")
@@ -148,7 +154,7 @@ function converge!(ep::ExtParams, op::OrderParams, pars::Params,
     for it = 1:maxiters
         Δ = 0.0
         verb > 1 && println("it=$it")
-
+        oki = true
         if enetype == :theta
             @update  op.qh0     fqh0_theta       Δ ψ verb  ep.α ep.β op.q0 ep.qs
         elseif enetype == :loglike
@@ -159,14 +165,14 @@ function converge!(ep::ExtParams, op::OrderParams, pars::Params,
             @update  op.qh1     fqh1_continuous     Δ ψ verb  ep.qs op.qh0 op.qh1
             @update  op.q0      fq0_continuous     Δ ψ verb  op.qh0 op.qh1
         elseif vartype == :continuous1
-            @updateI  op.qh1 ok     iqh1_continuous1     Δ ψ verb  ep.qs op.qh0 op.qh1
+            @updateI  op.qh1 oki     iqh1_continuous1     Δ ψ verb  ep.qs op.qh0 op.qh1
             @update  op.q0          fq0_continuous1      Δ ψ verb  op.qh0 op.qh1
         elseif vartype == :binary
             @update  op.q0      fq0_binary      Δ ψ verb  op.qh0 op.qh1
         end
 
         verb > 1 && println(" Δ=$Δ\n")
-        ok = Δ < ϵ
+        ok = Δ < ϵ && oki
         ok && break
     end
 
@@ -200,11 +206,34 @@ function converge(; α = 0.1, β=Inf, qs = 1.,
     return ep, op, tf, pars
 end
 
+"""
+    readparams(file::String, line::Int=-1)
 
-function span(; αlist = [0.1],
-                β=Inf, qs = 1.,
-                q0 = 0.1,
-                qh0 = 0.1, qh1 = 0.,
+Read order and external params from results file.
+Zero or negative line numbers are counted
+from the end of the file.
+"""
+function readparams(file::String, line::Int=0)
+    lines = readlines(file)
+    l = line > 0 ? line : length(lines) + line
+    v = map(x->parse(Float64, x), split(lines[l]))
+
+    i0 = length(fieldnames(ExtParams))
+    iend = i0 + length(fieldnames(OrderParams))
+    return ExtParams(v[1:i0]...), OrderParams(v[i0+1:iend]...)
+end
+
+function span(; q0=0.13,
+                qh0=0.23,
+                qh1=-1.0,
+                kws...)
+
+        op = OrderParams(q0, qh0, qh1)
+        span!(op; kws...)
+end
+
+function span!(op; αlist = [0.1],
+                β=Inf, qslist = 1.,
                 vartype = :binary, # :binary, :continuous, :continuous1
                 enetype = :theta, # :theta, :loglike
                 ϵ = 1e-5, ψ = 0.0, maxiters = 1_000, verb = 3,
@@ -213,18 +242,18 @@ function span(; αlist = [0.1],
     lockfile = resfile *".lock"
     if !isfile(resfile)
         open(resfile, "w") do f
-            allheadersshow(f, ExtParamsPF, OrderParamsPF, ThermFuncPF)
+            allheadersshow(f, ExtParams, OrderParams, ThermFunc)
         end
     end
 
-    ep = ExtParams(first(αlist), β, qs)
+    ep = ExtParams(first(αlist), β, first(qslist))
     pars = Params(ϵ, ψ, maxiters, verb)
-    op = OrderParams(q0, qh0, qh1)
     results = []
 
-    for α in αlist
+    for α in αlist, qs in qslist
         println("\n########  NEW ITER  ########\n")
         ep.α = α
+        ep.qs = qs
         verb > 0 && println(ep)
 
         ok = converge!(ep, op, pars, vartype, enetype)

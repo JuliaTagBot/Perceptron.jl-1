@@ -102,47 +102,56 @@ function GsPF_continuous(qh0, qh1, sh0, sh1, Sh, Qh)
 end
 
 function argGsPF_continuous1(z0, qh0, qh1, sh0, sh1, Sh, Qh)
-    if qh1 < qh0
-        a = (Qh*qh0-sh0^2) / qh0
-        b = (sh1-sh0)^2/(qh0-qh1)
-        num = ∫D(W->begin
-            d = √qh0/(qh0-qh1)*z0 + √(b/((a+b)*(qh0-qh1)))*W
-            Ap = (-1+d) / √(a/((a+b)*(qh0-qh1)))
-            Bp = d / √(a/((a+b)*(qh0-qh1)))
-            Am = d / √(a/((a+b)*(qh0-qh1)))
-            Bm = (1+d) / √(a/((a+b)*(qh0-qh1)))
+    ferf = qh1 > qh0 ? erfi : erf
+    Δqh = abs(qh1-qh0)
+    I0 = √(π/(2Δqh)) * (ferf((Δqh+√qh0*z0)/√(2*Δqh)) + ferf((Δqh-√qh0*z0)/√(2*Δqh)))
 
+    a = √((Qh*qh0*(qh0 - qh1) + qh1*sh0^2 + qh0*sh1*(-2*sh0 + sh1))/
+            ((qh0 - qh1)*(-sh0^2 + qh0*(Qh + (sh0 - sh1)^2))))
+    b = z0*qh0/(qh0 - qh1) * (sh1-sh0) / √(Qh*qh0 - sh0^2 + qh0*(sh1 - sh0)^2)
+    AB = √((Qh*qh0 - sh0^2)/qh0 +(sh1-sh0)^2)
 
-            c = (sh1-sh0)/(qh0-qh1)*√qh0 + sh0/√qh0
-            return (H(Ap)-H(Bp))*log(2cosh(√(a+b)*W + Sh + c*z0)) +
-                   (H(Am)-H(Bm))*log(2cosh(√(a+b)*W - Sh + c*z0))
+    A = √((Qh*qh0 - sh0^2)/qh0) / AB
+    B = (sh1-sh0) / AB
+    C = B^2 +(qh0-qh1)*A^2
+    aC = abs(C)
+    ferfp = C > 0 ? (x,y)->√(π/(2aC)) * (erf(x/√(2aC)/A) - erf(y/√(2aC)/A)) :
+                    (x,y)->√(π/(2aC)) * (-erfi(x/√(2aC)/A) + erfi(y/√(2aC)/A))
+    Ip = ∫D(η-> begin
+        Θ = a*η+b
+        D = A*B*Θ+√qh0*z0*A + A*(qh1-qh0)*B*Θ
+        return ferfp(A*D+C*B*Θ, A*D+C*(B*Θ-1)) *
+                log(2cosh(AB*Θ + Sh + sh0/√qh0*z0))
         end)
 
-        Aden = (-1 - √qh0/(qh0-qh1)*z0) * √(qh0-qh1)
-        Bden = (1 - √qh0/(qh0-qh1)*z0) * √(qh0-qh1)
-        den = H(Aden) - H(Bden)
-    else
-        a = (Qh*qh0-sh0^2) / qh0
-        b = (sh1-sh0)^2/(qh1-qh0)
-        num = ∫D(W->begin
-            d = √qh0/(qh1-qh0)*z0 + √(b/((a+b)*(qh1-qh0)))*W
-            Ap = (-1+d) / √(a/((a+b)*(qh1-qh0)))
-            Bp = d / √(a/((a+b)*(qh1-qh0)))
-            Am = d / √(a/((a+b)*(qh1-qh0)))
-            Bm = (1+d) / √(a/((a+b)*(qh1-qh0)))
-
-
-            c = (sh1-sh0)/(qh1-qh0)*√qh0 - sh0/√qh0
-            return (Hi(Ap)-Hi(Bp))*log(2cosh(√(a+b)*W + Sh + c*z0)) +
-                   (Hi(Am)-Hi(Bm))*log(2cosh(√(a+b)*W - Sh + c*z0))
+    ferfm = C > 0 ? (x,y)->√(π/(2aC)) * (-erf(x/√(2aC)/A) + erf(y/√(2aC)/A)) :
+                    (x,y)->√(π/(2aC)) * (erfi(x/√(2aC)/A) - erfi(y/√(2aC)/A))
+    Im = ∫D(η-> begin
+        Θ = a*η+b
+        D = A*B*Θ+√qh0*z0*A + A*(qh1-qh0)*B*Θ
+        return ferfm(A*D+C*B*Θ, A*D+C*(B*Θ+1)) *
+                log(2cosh(AB*Θ - Sh + sh0/√qh0*z0))
         end)
 
-        Aden = (-1 - √qh0/(qh1-qh0)*z0) * √(qh1-qh0)
-        Bden = (1 - √qh0/(qh1-qh0)*z0) * √(qh1-qh0)
-        den = Hi(Aden) - Hi(Bden)
-    end
-    return num / den
+    return a*(Ip + Im)/I0
 end
+#
+# function argGsPF_continuous1(z0, qh0, qh1, sh0, sh1, Sh, Qh)
+#     a = √((Qh*qh0-sh0^2) / qh0)
+#     b = sh0 /√qh0
+#
+#     den = ∫d(w->exp((qh1-qh0)*w^2/2+√qh0*z0*w), -1., 1.)
+#
+#     num = ∫d(w-> begin
+#         c0p = exp((qh1-qh0)*w^2/2+√qh0*z0*w)
+#         cp = ∫D(η->log(2cosh((sh1-sh0)*w + Sh + a*η + b*z0)))
+#         c0m = exp((qh1-qh0)*w^2/2-√qh0*z0*w)
+#         cm = ∫D(η->log(2cosh(-(sh1-sh0)*w - Sh + a*η + b*z0)))
+#         return c0p*cp+c0m*cm
+#     end, 0., 1.)
+#
+#     return num/den
+# end
 
 function GsPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh)
     ∫D(z0->begin
@@ -215,6 +224,10 @@ fs0PF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = -deriv(GsPF_continuous1, 3, qh0,
 fs1PF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = deriv(GsPF_continuous1, 4, qh0, qh1, sh0, sh1,  Sh, Qh)
 fSPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = deriv(GsPF_continuous1, 5, qh0, qh1, sh0, sh1, Sh, Qh)
 fQPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = 1-2*deriv(GsPF_continuous1, 6, qh0, qh1, sh0, sh1, Sh, Qh)
+# fs0PF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = -deriv∫D(argGsPF_continuous1, 3, qh0, qh1, sh0, sh1, Sh, Qh)
+# fs1PF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = deriv∫D(argGsPF_continuous1, 4, qh0, qh1, sh0, sh1,  Sh, Qh)
+# fSPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = deriv∫D(argGsPF_continuous1, 5, qh0, qh1, sh0, sh1, Sh, Qh)
+# fQPF_continuous1(qh0, qh1, sh0, sh1, Sh, Qh) = 1-2*deriv∫D(argGsPF_continuous1, 6, qh0, qh1, sh0, sh1, Sh, Qh)
 
 function iShPF_continuous(S, qh0, qh1, sh0, sh1, Sh_0, Qh)
     ok, Sh, it, normf0 = findroot(Sh -> S - fSPF_continuous(qh0, qh1, sh0, sh1, Sh, Qh), Sh_0,
@@ -321,7 +334,7 @@ end
 ############
 
 function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
-                    vartype::Symbol, enetype::Symbol)
+                    vartype::Symbol, enetype::Symbol; withSh::Bool=true)
     @extract pars : maxiters verb ϵ ψ
 
     if vartype == :binary
@@ -333,11 +346,9 @@ function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
     # converge central replica
     ep2 = ExtParams(ep.α, ep.β, ep.qs)
     pars2 = deepcopy(pars)
-    pars2.verb = 1
+    pars2.verb = 2
     pars2.ψ = 0
     op2 = OrderParams(op.q0, op.qh0, op.qh1)
-    println(op2)
-    println(ep2)
     converge!(ep2, op2, pars2, vartype, enetype)
     op.q0 = op2.q0
     op.qh0 = op2.qh0
@@ -345,36 +356,12 @@ function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
 
     Δ = Inf
     ok = false
-    okI = true
     println(op)
     it = 0
     for it = 1:maxiters
         Δ = 0.0
+        oki = true
         verb > 1 && println("it=$it")
-
-        fix!(ep, op)
-
-        if vartype == :binary
-            @update  op.Q       fQPF_binary        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
-            @update  op.s0      fs0PF_binary       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
-            @updateI op.sh1 okI  ish1PF_binary      Δ ψ verb  op.s1 op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
-        elseif vartype == :continuous
-            @update  op.Q       fQPF_continuous        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            @update  op.s0      fs0PF_continuous       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            @update  op.s1      fs1PF_continuous       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            # if it % 4 == 0
-                @updateI op.Sh okI   iShPF_continuous       Δ ψ verb  ep.S op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            # end
-        elseif vartype == :continuous1
-            @update  op.Q       fQPF_continuous1        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            @update  op.s0      fs0PF_continuous1       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            @update  op.s1      fs1PF_continuous1       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            # if it % 4 == 0
-                @updateI op.Sh okI   iShPF_continuous1       Δ ψ verb  ep.S op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
-            # end
-        end
-
-        fix!(ep, op)
 
         if enetype == :theta
             @update  op.Qh      fQhPF_theta     Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
@@ -390,9 +377,37 @@ function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
             end
         end
 
+        fix!(ep, op)
+
+        if vartype == :binary
+            @update  op.Q       fQPF_binary        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
+            @update  op.s0      fs0PF_binary       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
+            @updateI op.sh1 oki  ish1PF_binary      Δ ψ verb  op.s1 op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
+        elseif vartype == :continuous
+            @update  op.Q       fQPF_continuous        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            @update  op.s0      fs0PF_continuous       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            @update  op.s1      fs1PF_continuous       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            if withSh
+                @update ep.S    fSPF_continuous       Δ ψ verb op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            else
+                @updateI op.Sh oki   iShPF_continuous       Δ ψ verb  ep.S op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            end
+        elseif vartype == :continuous1
+            @update  op.Q       fQPF_continuous1        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            @update  op.s0      fs0PF_continuous1       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            @update  op.s1      fs1PF_continuous1       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            if withSh
+                @update ep.S  fSPF_continuous1       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            else
+                @updateI op.Sh oki iShPF_continuous1       Δ ψ verb  ep.S op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
+            end
+        end
+
+        fix!(ep, op)
+
         verb > 1 && println(" Δ=$Δ\n")
-        ok = Δ < ϵ
-        ok && okI && break
+        ok = Δ < ϵ && oki
+        ok && break
     end
 
     if verb > 0
@@ -466,6 +481,8 @@ end
 function spanPF!(op::OrderParamsPF; β=Inf,
                 qslist = [1.],
                 Slist = [0.157],
+                Shlist = op.Sh,
+                withSh = true,
                 αlist = [0.1],
                 vartype = :binary, # :binary, :continuous, :continuous1
                 enetype = :theta, # :theta, :loglike
@@ -486,14 +503,18 @@ function spanPF!(op::OrderParamsPF; β=Inf,
     pars = Params(ϵ, ψ, maxiters, verb)
     results = []
 
-    for S in Slist, α in αlist, qs in qslist
+    for S in Slist, α in αlist, qs in qslist, Sh in Shlist
         println("\n########  NEW ITER  ########\n")
-        ep.S = S
+        if withSh
+            op.Sh = Sh
+        else
+            ep.S = S
+        end
         ep.α = α
         ep.qs = qs
         verb > 0 && println(ep)
 
-        ok = convergePF!(ep, op, pars, vartype, enetype)
+        ok = convergePF!(ep, op, pars, vartype, enetype, withSh=withSh)
         tf = all_therm_funcPF(ep, op, vartype, enetype)
         push!(results, (ok, deepcopy(ep), deepcopy(op), deepcopy(tf)))
         verb > 0 && println(tf)

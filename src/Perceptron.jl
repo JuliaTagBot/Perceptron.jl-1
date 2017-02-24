@@ -2,7 +2,10 @@ module Perceptron
 using LittleScienceTools.Roots
 using ExtractMacro
 using Dierckx
-
+using AutoGrad
+if VERSION > v"0.5"
+    using SpecialFunctions
+end
 import QuadGK: quadgk
 
 @assert success(`which lockfile`)
@@ -16,9 +19,9 @@ function exclusive(f::Function, fn::AbstractString = "lock.tmp")
     end
 end
 
-G(x) = e^(-(x^2)/2) / √(convert(typeof(x),2) * π)
-H(x) = erfc(x / √convert(typeof(x),2)) / 2
-Hi(x) = 0.5*(1-erfi(x / √convert(typeof(x),2))) / 2
+G(x) = exp(-(x^2)/2) / √(2π)
+H(x) = erfc(x / √2) / 2
+Hi(x) = 0.5*(1-erfi(x / √2)) / 2
 function GHapp(x)
     y = 1/x
     y2 = y^2
@@ -28,7 +31,7 @@ GH(x) = ifelse(x > 30.0, GHapp(x), G(x) / H(x))
 GH(x::BigFloat) = G(x) / H(x)
 
 logH(x) = x < -35.0 ? G(x) / x :
-          x >  35.0 ? -x^2 / 2 - log(convert(typeof(x),2) * π) / 2 - log(x) :
+          x >  35.0 ? -x^2 / 2 - log(2π) / 2 - log(x) :
           log(H(x))
 
 const ∞ = 30.0
@@ -39,12 +42,20 @@ interval = map(x->sign(x)*abs(x)^2, -1:dx:1) .* ∞
 ∫D(f, int=interval) = quadgk(z->begin
         r = G(z) * f(z)
         isfinite(r) ? r : 0.0
-    end, int..., abstol=1e-16, maxevals=10^7)[1]
+    end, int..., abstol=1e-12, maxevals=10^5)[1]
 
-function deriv(f::Function, i::Integer, x...; δ::Float64 = 1e-7)
+∫d(f, a, b) = quadgk(f, union([a:dx:b;],b)..., abstol=1e-12, maxevals=10^5)[1]
+
+function deriv(f::Function, i::Integer, x...; δ::Float64 = 1e-5)
     f0 = f(x[1:i-1]..., x[i]-δ, x[i+1:end]...)
     f1 = f(x[1:i-1]..., x[i]+δ, x[i+1:end]...)
     return (f1-f0) / 2δ
+    # return grad(f, i)(x...)
+end
+
+function deriv∫D(f::Function, i::Integer, x...)
+    g = grad(f, i+1)
+    return ∫D(z->g(z,x...))
 end
 
 function shortshow(io::IO, x)
