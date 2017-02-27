@@ -375,7 +375,7 @@ Saddle points condition, obtained by derivation of last equations, read
 \begin_layout Standard
 \begin_inset Formula 
 \begin{align}
-\hat{q}_{0} & =\int\mathcal{D}z_{0}\left(\frac{\int\mathcal{D}u\ f'\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}{\int\mathcal{D}u\ f\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}\right)^{2}\\
+\hat{q}_{0} & =\alpha\int\mathcal{D}z_{0}\left(\frac{\int\mathcal{D}u\ f'\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}{\int\mathcal{D}u\ f\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}\right)^{2}\\
 q_{0} & =\int\mathcal{D}z_{0}\ \left(\frac{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}\,W}{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}}\right)^{2}\\
 q_{*} & =\int\mathcal{D}z_{0}\ \frac{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}\,W^{2}}{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}}
 \end{align}
@@ -527,6 +527,73 @@ case
 \begin_inset Formula 
 \begin{equation}
 \mathcal{G}_{E}[q]=\int\mathcal{D}z_{0}\log\int\mathcal{D}u\ H^{\beta}\left(-\frac{\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u}{\sqrt{1-q_{*}}}\right)
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+RS Stability
+\end_layout
+
+\begin_layout Standard
+Following the derivation of Derrida and Gardner we give the following stability
+ criterion for the replicon eigenvalue of the RS solution
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\text{\alpha}\gamma_{E}\gamma_{S}<1
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\gamma_{E} & =\int\mathcal{D}z_{0}\left[\overline{\hat{u}^{2}}(z_{0})-\left(\overline{\hat{u}}(z_{0})\right)^{2}\right]^{2}\\
+\gamma_{S} & =\int\mathcal{D}z_{0}\left[\overline{W^{2}}(z_{0})-\left(\overline{W}(z_{0})\right)^{2}\right]^{2}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align}
+\overline{\hat{u}^{k}}(z_{0}) & \equiv\frac{\int\frac{\dd\hat{u}\dd u}{2\pi}\ \hat{u}^{k}\,e^{-\frac{1}{2}(q_{*}-q_{0})\hat{u}^{2}+i\hat{u}u+i\hat{u}\sqrt{q_{0}}z_{0}}f(u)}{\int\frac{\dd\hat{u}\dd u}{2\pi}\ e^{-\frac{1}{2}(q_{*}-q_{0})\hat{u}^{2}+i\hat{u}u+i\hat{u}\sqrt{q_{0}}z_{0}}f(u)}\\
+\overline{W^{k}}(z_{0}) & \equiv\frac{\int_{\Omega}\dd W\ W^{k}\,e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}}{\int_{\Omega}\dd W\ e^{\frac{1}{2}(\hat{q}_{1}-\hat{q}_{0})W^{2}+\sqrt{\hat{q}_{0}}z_{0}W}}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Equation can be simplified to 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\overline{\hat{u}^{k}}(z_{0})=\frac{i^{k}\int\mathcal{D}u\ f^{(k)}\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}{\int\mathcal{D}u\ f\left(\sqrt{q_{0}}z_{0}+\sqrt{q_{*}-q_{0}}u\right)}
 \end{equation}
 
 \end_inset

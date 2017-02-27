@@ -43,6 +43,23 @@ function Ge_loglike(β, q0, qs)
     end)
 end
 
+function stability_γE_loglike(β, q0, qs)
+    ∫D(z0->begin
+        den = ∫D(η->begin
+            H(-(√(qs-q0)*η+√q0*z0)/√(1-qs))^β
+        end)
+
+        u1 = ∫D(η->begin
+                η/√(qs-q0)*H(-(√(qs-q0)*η+√q0*z0)/√(1-qs))^β
+            end)
+        u2 = ∫D(η->begin
+            (η^2-1)/(qs-q0)*H(-(√(qs-q0)*η+√q0*z0)/√(1-qs))^β
+        end)
+        return (u2/den-(u1/den)^2)^2
+    end)
+end
+
+
 # ENTROPIC TERM
 function flogerf(a,b)
     b < 0 && return flogerf(a,-b)
@@ -110,17 +127,39 @@ function free_entropy(ep, op, vartype, enetype)
     return ϕ
 end
 
+function stability(ep, op, vartype, enetype)
+    @extract ep : α β qs
+    @extract op : q0 qh0 qh1
+    if vartype == :continuous1 && enetype == :loglike
+        γS = stability_γS_continuous1(qh0, qh1)
+        γE = stability_γE_loglike(β, q0, qs)
+        return 1 - α*γS*γE  # α*γS*γE < 1 => the solution is locally stable
+    else
+        error("TODO")
+    end
+end
+
 ####
+function stability_γS_continuous1(qh0, qh1)
+    return ∫D(z0-> begin
+        den = ∫d(w->exp((qh1-qh0)*w^2/2 + √qh0*z0*w), -1., 1.)
+        w1 = ∫d(w->w*exp((qh1-qh0)*w^2/2 + √qh0*z0*w), -1., 1.)
+        w2 = ∫d(w->w^2*exp((qh1-qh0)*w^2/2 + √qh0*z0*w), -1., 1.)
+        return (w2/den-(w1/den)^2)^2
+    end)
+end
+
 fq0_continuous(qh0, qh1) = -2*∂qh0_Gs_continuous(qh0, qh1)
 fqh1_continuous(qs, qh0, qh1) = (-1+2qh0*qs-√(1+4qh0*qs)) / (2qs)
 
-fq0_continuous1(qh0, qh1) = -2*deriv∫D(argGs_continuous1, 1, qh0, qh1)
-fqs_continuous1(qh0, qh1) = 2*deriv∫D(argGs_continuous1, 2, qh0, qh1)
+fq0_continuous1(qh0, qh1) = -2*grad∫D(argGs_continuous1, 1, qh0, qh1)
+fqs_continuous1(qh0, qh1) = 2*grad∫D(argGs_continuous1, 2, qh0, qh1)
 
 fq0_binary(qh0, qh1) = -2*∂qh0_Gs_binary(qh0, qh1)
 
 fqh0_theta(α, β, q0, qs) = -2α*∂q0_Ge_theta(β, q0, qs)
-fqh0_loglike(α, β, q0, qs) = -2α*grad(Ge_loglike, 2)(β, q0, qs)
+# fqh0_loglike(α, β, q0, qs) = -2α*grad∫D(argGe_loglike, 2, β, q0, qs)
+fqh0_loglike(α, β, q0, qs) = -2α*deriv(Ge_loglike, 2, β, q0, qs)
 
 function iqh1_continuous1(qs, qh0, qh1_0)
     ok, qh1, it, normf0 = findroot(qh1 -> qs - fqs_continuous1(qh0, qh1), qh1_0, NewtonMethod())
@@ -233,11 +272,12 @@ function span(; q0=0.13,
 end
 
 function span!(op; αlist = [0.1],
-                β=Inf, qslist = 1.,
+                βlist = [Inf], qslist = 1.,
                 vartype = :binary, # :binary, :continuous, :continuous1
                 enetype = :theta, # :theta, :loglike
                 ϵ = 1e-5, ψ = 0.0, maxiters = 1_000, verb = 3,
-                resfile = "results_$(vartype)_$(enetype).txt")
+                resfile = "results_$(vartype)_$(enetype).txt",
+                checkstability = true)
 
     lockfile = resfile *".lock"
     if !isfile(resfile)
@@ -246,18 +286,23 @@ function span!(op; αlist = [0.1],
         end
     end
 
-    ep = ExtParams(first(αlist), β, first(qslist))
+    ep = ExtParams(first(αlist), first(βlist), first(qslist))
     pars = Params(ϵ, ψ, maxiters, verb)
     results = []
 
-    for α in αlist, qs in qslist
+    for α in αlist, qs in qslist, β in βlist
         println("\n########  NEW ITER  ########\n")
         ep.α = α
         ep.qs = qs
+        ep.β = β
         verb > 0 && println(ep)
 
         ok = converge!(ep, op, pars, vartype, enetype)
         tf = all_therm_func(ep, op, vartype, enetype)
+        if checkstability
+            stab = stability(ep, op, vartype, enetype)
+            println("stability = $stab")
+        end
         push!(results, (ok, deepcopy(ep), deepcopy(op), deepcopy(tf)))
         verb > 0 && println(tf)
         if ok

@@ -53,7 +53,7 @@ function deriv(f::Function, i::Integer, x...; δ::Float64 = 1e-5)
     # return grad(f, i)(x...)
 end
 
-function deriv∫D(f::Function, i::Integer, x...)
+function grad∫D(f::Function, i::Integer, x...)
     g = grad(f, i+1)
     return ∫D(z->g(z,x...))
 end

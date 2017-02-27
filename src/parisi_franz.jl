@@ -47,17 +47,24 @@ function argGePF_loglike(z0, hβ, β, q0, qs, s0, s1, Q)
         hβ(x) * logH(y)
     end)
 
-    # no interp hβ
-    # a = √(qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2)))
-    #     b = √((Q*q0-s0^2)/q0)
-    #     num = ∫D(η->begin
-    #         h = ∫D(z1->begin
-    #             x = -(√q0*z0 + (s1-s0)/b*η + √a*z1) / √(1-qs)
-    #             H(x)^β
-    #         end)
-    #         y = -(s0/√q0*z0 + b*η) / √(1-Q)
-    #         h * logH(y)
-    #     end)
+    den = ∫D(z1->begin
+        x = -(√q0*z0 + √(qs-q0)*z1) / √(1-qs)
+        H(x)^β
+    end)
+    return num/den
+end
+
+function argGePF_loglike(z0, β, q0, qs, s0, s1, Q)
+    a = √(qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2)))
+    b = √((Q*q0-s0^2)/q0)
+    num = ∫D(η->begin
+        h = ∫D(z1->begin
+            x = -(√q0*z0 + (s1-s0)/b*η + a*z1) / √(1-qs)
+            H(x)^β
+        end)
+        y = -(s0/√q0*z0 + b*η) / √(1-Q)
+        h * logH(y)
+    end)
 
     den = ∫D(z1->begin
         x = -(√q0*z0 + √(qs-q0)*z1) / √(1-qs)
@@ -66,23 +73,30 @@ function argGePF_loglike(z0, hβ, β, q0, qs, s0, s1, Q)
     return num/den
 end
 
-
 function GePF_loglike(β, q0, qs, s0, s1, Q)
     a = √(qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2)))
-    x = [-2∞:0.1:2∞;]
+    b = √((Q*q0-s0^2)/q0)
+    # xmin = -(√q0 + abs((s1-s0)/b))*∞
+    # xmax = abs(xmin)
+    # dx = (xmax - xmin) / 100000
+    # x = [xmin:dx:xmax;]
+    # println(β)
+    dx = 0.01
+    x = [-20.:dx:20.;]
     y = Float64[
         ∫D(z1->begin
-            H(-(x + √a*z1) / √(1-qs))^β
+            H(-(x + a*z1) / √(1-qs))^β
         end) for x in x]
     hβ = Spline1D(x, y)
+    # return hβ
     return ∫D(z0->begin
         argGePF_loglike(z0, hβ, β, q0, qs, s0, s1, Q)
     end)
 
-    # no interp hβ
-    #     ∫D(z0->begin
-    #         argGePF_loglike(z0, β, q0, qs, s0, s1, Q)
-    #     end)
+#    no interp hβ
+        # ∫D(z0->begin
+        #     argGePF_loglike(z0, β, q0, qs, s0, s1, Q)
+        # end)
 end
 #### ENTROPIC TERM ##############
 
@@ -274,63 +288,63 @@ fQhPF_loglike(α, β, q0, qs, s0, s1, Q) = -2α*deriv(GePF_loglike, 6, β, q0, q
 # fsh1PF_theta(α, q0, qs, s0, s1, Q) = α*deriv(GePF_theta, 4, q0, qs, s0, s1, Q))
 
 ###########
-function fix!(ep::ExtParamsPF, op::OrderParamsPF)
-    @extract ep : qs
-    @extract op : q0 s0 s1 Q qh0 qh1 sh0 sh1 Sh Qh
-    if Qh*qh0  - sh0^2 < 0
-        op.Qh = sh0^2/qh0 + 1e-3
-        warn("fix Qh: $Qh -> $(op.Qh)")
-    end
-    #
-    # if s0 > s1
-    #     s1, s0 = s0, s1
-    #     op.s1 = s1
-    #     op.s0 = s0
-    #     warn("fix s0 s1: $s0 $s1")
-    # end
-    d = Q*q0  - s0^2
-    if d < 0
-        print("!")
-        while d < 0
-            s0 *=(1-1e-2)
-            d = Q*q0  - s0^2
-        end
-        op.s0 = s0
-        warn("fix1 s0: $s0")
-    end
-    #
-    # d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
-    # if d < 0
-    #     while d < 0
-    #         Q *= (1+1e-3)
-    #         d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
-    #     end
-    #     op.Q = Q
-    #     warn("fix1 Q: $Q")
-    # end
-
-    d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
-    if d < 0
-        print("!d ")
-        # if s1 > s0
-        #     while d < 0
-        #         s0 *= (1+1e-3)
-        #         d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
-        #     end
-        #     op.s0 = s0
-        #     warn("fix2 s0: $s0")
-        # else
-            while d < 0
-                Q *= (1+1e-3)
-                d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
-            end
-            op.Q = Q
-            warn("fix1 Q: $Q")
-        # end
-    end
-
-
-end
+# function fix!(ep::ExtParamsPF, op::OrderParamsPF)
+#     @extract ep : qs
+#     @extract op : q0 s0 s1 Q qh0 qh1 sh0 sh1 Sh Qh
+#     if Qh*qh0  - sh0^2 < 0
+#         op.Qh = sh0^2/qh0 + 1e-3
+#         warn("fix Qh: $Qh -> $(op.Qh)")
+#     end
+#     #
+#     # if s0 > s1
+#     #     s1, s0 = s0, s1
+#     #     op.s1 = s1
+#     #     op.s0 = s0
+#     #     warn("fix s0 s1: $s0 $s1")
+#     # end
+#     d = Q*q0  - s0^2
+#     if d < 0
+#         print("!")
+#         while d < 0
+#             s0 *=(1-1e-2)
+#             d = Q*q0  - s0^2
+#         end
+#         op.s0 = s0
+#         warn("fix1 s0: $s0")
+#     end
+#     #
+#     # d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
+#     # if d < 0
+#     #     while d < 0
+#     #         Q *= (1+1e-3)
+#     #         d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
+#     #     end
+#     #     op.Q = Q
+#     #     warn("fix1 Q: $Q")
+#     # end
+#
+#     d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
+#     if d < 0
+#         print("!d ")
+#         # if s1 > s0
+#         #     while d < 0
+#         #         s0 *= (1+1e-3)
+#         #         d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
+#         #     end
+#         #     op.s0 = s0
+#         #     warn("fix2 s0: $s0")
+#         # else
+#             while d < 0
+#                 Q *= (1+1e-3)
+#                 d = qs-q0 - (s1-s0)^2/(Q-s0) *(1 - s0*(q0-s0)/(Q*q0-s0^2))
+#             end
+#             op.Q = Q
+#             warn("fix1 Q: $Q")
+#         # end
+#     end
+#
+#
+# end
 ############
 
 function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
@@ -339,6 +353,9 @@ function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
 
     if vartype == :binary
         op.s1 = ep.S
+        if withSh
+            op.sh1 = op.Sh
+        end
         op.Sh = 0
         op.qh1 = 0
     end
@@ -362,27 +379,16 @@ function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
         Δ = 0.0
         oki = true
         verb > 1 && println("it=$it")
-
-        if enetype == :theta
-            @update  op.Qh      fQhPF_theta     Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
-            @update  op.sh0     fsh0PF_theta    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
-            if vartype != :binary
-                @update  op.sh1     fsh1PF_theta    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
-            end
-        elseif enetype == :loglike
-            @update  op.Qh      fQhPF_loglike     Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
-            @update  op.sh0     fsh0PF_loglike    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
-            if vartype != :binary
-                @update  op.sh1     fsh1PF_loglike    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
-            end
-        end
-
-        fix!(ep, op)
+        # fix!(ep, op)
 
         if vartype == :binary
             @update  op.Q       fQPF_binary        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
             @update  op.s0      fs0PF_binary       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
-            @updateI op.sh1 oki  ish1PF_binary      Δ ψ verb  op.s1 op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
+            if withSh
+                @update op.s1  fs1PF_binary      Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
+            else
+                @updateI op.sh1 oki  ish1PF_binary      Δ ψ verb  op.s1 op.qh0 op.qh1 op.sh0 op.sh1 op.Qh
+            end
         elseif vartype == :continuous
             @update  op.Q       fQPF_continuous        Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
             @update  op.s0      fs0PF_continuous       Δ ψ verb  op.qh0 op.qh1 op.sh0 op.sh1 op.Sh op.Qh
@@ -403,7 +409,21 @@ function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
             end
         end
 
-        fix!(ep, op)
+        if enetype == :theta
+            @update  op.Qh      fQhPF_theta     Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
+            @update  op.sh0     fsh0PF_theta    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
+            if vartype != :binary
+                @update  op.sh1     fsh1PF_theta    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
+            end
+        elseif enetype == :loglike
+            @update  op.Qh      fQhPF_loglike     Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
+            @update  op.sh0     fsh0PF_loglike    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
+            if vartype != :binary
+                @update  op.sh1     fsh1PF_loglike    Δ ψ verb  ep.α ep.β op.q0 ep.qs op.s0 op.s1 op.Q
+            end
+        end
+
+        # fix!(ep, op)
 
         verb > 1 && println(" Δ=$Δ\n")
         ok = Δ < ϵ && oki
@@ -414,6 +434,9 @@ function convergePF!(ep::ExtParamsPF, op::OrderParamsPF, pars::Params,
         println(ok ? "converged" : "failed", " (it=$it Δ=$Δ)")
         println(ep)
         println(op)
+    end
+    if vartype == :binary
+        ep.S = op.s1
     end
     return ok
 end

@@ -4,11 +4,15 @@ set fit results
 set output "pf.eps"
 set ylabel "PF Entropy"
 set xlabel "d"
-set xr[0.:]
+set xr[0.:0.01]
 set yr[:]
 set key left
-plot    "<awk '$1==0.6' resultsPF_continuous_theta.txt " u ((1-$4)/2):15  w lp t "{/Symbol a}=0.6 continuous",\
-        "<awk '$1==0.6' resultsPF_binary_theta.txt " u ((1-$4)/2):15 w lp t "{/Symbol a}=0.6 binary",\
-        "<awk '$1==0.7' resultsPF_binary_theta.txt " u ((1-$4)/2):15 w lp t "{/Symbol a}=0.7 binary",\
+
+f(x) = -x*log(x) - (1-x)*log(1-x)
+plot    "<awk '$1==0.6' ../data/resultsPF_continuous_theta.txt " u ((1-$4)/2):15  w lp t "{/Symbol a}=0.6 continuous",\
+        "<awk '$1==0.6' ../data/resultsPF_binary_theta.txt " u ((1-$4)/2):15 w lp t "{/Symbol a}=0.6 binary",\
+        "<awk '$1==0.6 && $3==0.9 && $2==10.0' ../data/resultsPF_continuous1_loglike.txt " u ((1-$4)/2):15 w lp t "{/Symbol a}=0.6 cont1 loglike {/Symbol b}=10 q_*=0.9",\
+        "<awk '$1==0.6 && $3==0.8 && $2==10.0' ../data/resultsPF_continuous1_loglike.txt " u ((1-$4)/2):15 w lp t "{/Symbol a}=0.6 cont1 loglike {/Symbol b}=10 q_*=0.8",\
+        f(x) t "max ent",\
         0 ls 0 not
 reset
